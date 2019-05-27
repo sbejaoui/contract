@@ -15,7 +15,7 @@
                     <button name="recurring_create_invoice"
                             type="object"
                             attrs="{'invisible': [('create_invoice_visibility', '=', False)]}"
-                            string="Create invoices"
+                            string="Create next invoice"
                             groups="base.group_no_one"/>
                 </header>
                 <sheet string="Contract">

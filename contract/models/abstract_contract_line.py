@@ -81,7 +81,7 @@ class AccountAbstractAnalyticContractLine(models.AbstractModel):
     )
     date_start = fields.Date(string='Date Start')
     recurring_next_date = fields.Date(string='Date of Next Invoice')
-    last_date_invoiced = fields.Date(string='Last Date Invoiced')
+    last_date_invoiced = fields.Date(string='Invoiced until')
     is_canceled = fields.Boolean(string="Canceled", default=False)
     is_auto_renew = fields.Boolean(string="Auto Renew", default=False)
     auto_renew_interval = fields.Integer(

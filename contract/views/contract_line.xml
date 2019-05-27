@@ -125,11 +125,11 @@
                 <field name="is_auto_renew" invisible="1"/>
                 <field name="is_canceled" invisible="1"/>
                 <button name="action_plan_successor"
-                        string="Plan Start" type="object"
+                        string="Plan successor" type="object"
                         icon="fa-calendar text-success"
                         attrs="{'invisible': [('is_plan_successor_allowed', '=', False)]}"/>
                 <button name="action_stop_plan_successor"
-                        string="Stop Plan Successor"
+                        string="Stop and plan successor"
                         type="object"
                         icon="fa-pause text-muted"
                         attrs="{'invisible': [('is_stop_plan_successor_allowed', '=', False)]}"/>
