@@ -23,7 +23,7 @@ Contracts Management - Recurring
     :target: https://runbot.odoo-community.org/runbot/110/12.0
     :alt: Try me on Runbot
 
-|badge1| |badge2| |badge3| |badge4| |badge5| 
+|badge1| |badge2| |badge3| |badge4| |badge5|
 
 This module enables contracts management with recurring
 invoicing functions. Also you can print and send by email contract report.
@@ -66,7 +66,7 @@ To use this module, you need to:
 #. Choosing between pre-paid and post-paid, you modify the dates that are shown
    with the markers.
 #. A cron is created with daily interval, but if you are in debug mode, you can
-   click on *Create invoices* to force this action.
+   click on *Create next invoice* to force this action.
 #. Click *Show recurring invoices* link to show all invoices created by the
    contract.
 #. Click on *Print > Contract* menu to print contract report.

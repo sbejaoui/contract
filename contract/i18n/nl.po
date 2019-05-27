@@ -317,7 +317,7 @@ msgstr ""
 
 #. module: contract
 #: model_terms:ir.ui.view,arch_db:contract.account_analytic_account_recurring_form_form
-msgid "Create invoices"
+msgid "Create next invoice"
 msgstr "Facturen aanmaken"
 
 #. module: contract

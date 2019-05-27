@@ -31,7 +31,7 @@ class AccountAnalyticInvoiceLine(models.Model):
     date_end = fields.Date(string='Date End', index=True)
     recurring_next_date = fields.Date(string='Date of Next Invoice')
     last_date_invoiced = fields.Date(
-        string='Last Date Invoiced', readonly=True, copy=False
+        string='Invoiced until', readonly=True, copy=False
     )
     termination_notice_date = fields.Date(
         string='Termination notice date',
