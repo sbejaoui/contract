@@ -56,7 +56,6 @@ class TestContractBase(common.SavepointCase):
                 'name': 'Test Contract',
                 'partner_id': cls.partner.id,
                 'pricelist_id': cls.partner.property_product_pricelist.id,
-                'recurring_invoices': True,
             }
         )
         cls.contract2 = cls.env['contract.contract'].create(
@@ -64,7 +63,6 @@ class TestContractBase(common.SavepointCase):
                 'name': 'Test Contract 2',
                 'partner_id': cls.partner.id,
                 'pricelist_id': cls.partner.property_product_pricelist.id,
-                'recurring_invoices': True,
                 'contract_type': 'purchase',
                 'contract_line_ids': [
                     (
@@ -387,11 +385,6 @@ class TestContract(TestContractBase):
                     'recurring_next_date': '2017-01-01',
                 }
             )
-
-    def test_check_recurring_next_date_recurring_invoices(self):
-        with self.assertRaises(ValidationError):
-            self.contract.write({'recurring_invoices': True})
-            self.acct_line.write({'recurring_next_date': False})
 
     def test_onchange_contract_template_id(self):
         """It should change the contract values to match the template."""

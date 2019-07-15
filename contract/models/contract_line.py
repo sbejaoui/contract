@@ -455,7 +455,7 @@ class ContractLine(models.Model):
 
     @api.constrains('recurring_next_date')
     def _check_recurring_next_date_recurring_invoices(self):
-        for rec in self.filtered('contract_id.recurring_invoices'):
+        for rec in self:
             if not rec.recurring_next_date and (
                 not rec.date_end
                 or not rec.last_date_invoiced
@@ -1052,7 +1052,6 @@ class ContractLine(models.Model):
         return [
             ('is_auto_renew', '=', True),
             ('is_canceled', '=', False),
-            ('contract_id.recurring_invoices', '=', True),
             ('termination_notice_date', '<=', fields.Date.context_today(self)),
         ]
 

@@ -19,7 +19,6 @@ class ResPartner(models.Model):
     def _compute_contract_count(self):
         contract_model = self.env['contract.contract']
         fetch_data = contract_model.read_group([
-            ('recurring_invoices', '=', True),
             ('partner_id', 'child_of', self.ids)],
             ['partner_id', 'contract_type'], ['partner_id', 'contract_type'],
             lazy=False)
@@ -45,10 +44,8 @@ class ResPartner(models.Model):
         res.update(
             context=dict(
                 self.env.context,
-                search_default_recurring_invoices=True,
                 search_default_partner_id=self.id,
                 default_partner_id=self.id,
-                default_recurring_invoices=True,
                 default_pricelist_id=self.property_product_pricelist.id,
             ),
         )
