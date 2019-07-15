@@ -8,7 +8,9 @@ from openupgradelib import openupgrade
 _logger = logging.getLogger(__name__)
 
 
-def migrate(cr, version):
+@openupgrade.migrate()
+def migrate(env, version):
+    cr = env.cr
     models_to_rename = [
         # Contract Line Wizard
         ('account.analytic.invoice.line.wizard', 'contract.line.wizard'),
@@ -53,19 +55,22 @@ def migrate(cr, version):
     openupgrade.rename_xmlids(cr, xmlids_to_rename)
     # A temporary column is needed to avoid breaking the foreign key constraint
     # The temporary column is dropped in the post-migration script
-    cr.execute(
+    openupgrade.logged_query(
+        cr,
         """
         ALTER TABLE account_invoice_line
         ADD COLUMN contract_line_id_tmp INTEGER
         """
     )
-    cr.execute(
+    openupgrade.logged_query(
+        cr,
         """
         UPDATE account_invoice_line
         SET contract_line_id_tmp = contract_line_id
         """
     )
-    cr.execute(
+    openupgrade.logged_query(
+        cr,
         """
         UPDATE account_invoice_line SET contract_line_id = NULL
         """
