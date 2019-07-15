@@ -3,22 +3,24 @@
 
 import logging
 
-from odoo import SUPERUSER_ID, api
+from openupgradelib import openupgrade
 
 _logger = logging.getLogger(__name__)
 
 
-def migrate(cr, version):
+@openupgrade.migrate()
+def migrate(env, version):
     """
     set recurring_next_date to false for finished contract
     """
     _logger.info(">> Pre-Migration 12.0.2.0.0")
-    with api.Environment(cr, SUPERUSER_ID, {}) as env:
-        contracts = env["account.analytic.account"].search([])
-        finished_contract = contracts.filtered(
-            lambda c: not c.create_invoice_visibility
-        )
-        cr.execute(
-            "UPDATE account_analytic_account set recurring_next_date=null "
-            "where id in (%)" % ','.join(finished_contract.ids)
-        )
+    _logger.info("set recurring_next_date to false for finished contract")
+    cr = env.cr
+    openupgrade.logged_query(
+        cr,
+        """
+        UPDATE account_analytic_account
+        SET    recurring_next_date=NULL 
+        WHERE  recurring_next_date > date_end
+        """
+    )

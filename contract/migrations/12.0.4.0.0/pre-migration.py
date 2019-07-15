@@ -67,16 +67,64 @@ def migrate(env, version):
         ADD COLUMN contract_line_id_tmp INTEGER
         """
     )
+    if openupgrade.column_exists(cr, 'account_invoice_line', 'contract_line_id'):
+        openupgrade.logged_query(
+            cr,
+            """
+            UPDATE account_invoice_line
+            SET contract_line_id_tmp = contract_line_id
+            """
+        )
+        openupgrade.logged_query(
+            cr,
+            """
+            UPDATE account_invoice_line SET contract_line_id = NULL
+            """
+        )
     openupgrade.logged_query(
         cr,
         """
-        UPDATE account_invoice_line
-        SET contract_line_id_tmp = contract_line_id
+        ALTER TABLE account_invoice
+        ADD COLUMN old_contract_id_tmp INTEGER
         """
     )
     openupgrade.logged_query(
         cr,
         """
-        UPDATE account_invoice_line SET contract_line_id = NULL
+        UPDATE account_invoice
+        SET old_contract_id_tmp = contract_id
         """
     )
+
+    if version == '12.0.1.0.0':
+        _logger.info("Move contract data to line level")
+        openupgrade.logged_query(
+            cr,
+            """
+        ALTER TABLE account_analytic_invoice_line
+            ADD COLUMN IF NOT EXISTS recurring_rule_type         VARCHAR(255),
+            ADD COLUMN IF NOT EXISTS recurring_invoicing_type    VARCHAR(255),
+            ADD COLUMN IF NOT EXISTS recurring_interval          INTEGER,
+            ADD COLUMN IF NOT EXISTS recurring_next_date         DATE,
+            ADD COLUMN IF NOT EXISTS date_start                  DATE,
+            ADD COLUMN IF NOT EXISTS date_end                    DATE
+        """,
+        )
+
+        openupgrade.logged_query(
+            cr,
+            """
+            UPDATE account_analytic_invoice_line AS contract_line
+            SET 
+                recurring_rule_type=contract.recurring_rule_type,
+                recurring_invoicing_type=contract.recurring_invoicing_type,
+                recurring_interval=contract.recurring_interval,
+                recurring_next_date=contract.recurring_next_date,
+                date_start=contract.date_start,
+                date_end=contract.date_end
+            FROM 
+                account_analytic_account AS contract
+            WHERE 
+                contract.id=contract_line.analytic_account_id
+            """,
+        )
