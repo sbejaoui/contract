@@ -27,7 +27,6 @@ def migrate(env, version):
             code,
             group_id,
             contract_template_id,
-            recurring_invoices,
             user_id,
             recurring_next_date,
             date_end,
@@ -52,7 +51,6 @@ def migrate(env, version):
                code,
                group_id,
                contract_template_id,
-               recurring_invoices,
                user_id,
                recurring_next_date,
                date_end,
@@ -65,7 +63,9 @@ def migrate(env, version):
                write_uid,
                write_date
         FROM account_analytic_account
-        WHERE recurring_invoices = TRUE
+        WHERE id in (
+            SELECT DISTINCT contract_id FROM account_analytic_invoice_line
+        )
         """
     )
     openupgrade.logged_query(

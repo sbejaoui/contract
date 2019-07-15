@@ -10,7 +10,14 @@ _logger = logging.getLogger(__name__)
 
 @openupgrade.migrate()
 def migrate(env, version):
+    _logger.info(">> Pre-Migration 12.0.4.0.0")
     cr = env.cr
+    openupgrade.logged_query(
+        cr,
+        """
+        DROP TABLE IF EXISTS account_analytic_invoice_line_wizard
+        """
+    )
     models_to_rename = [
         # Contract Line Wizard
         ('account.analytic.invoice.line.wizard', 'contract.line.wizard'),
@@ -27,8 +34,6 @@ def migrate(env, version):
         ('account.analytic.contract.line', 'contract.template.line'),
     ]
     tables_to_rename = [
-        # Contract Line Wizard
-        ('account_analytic_invoice_line_wizard', 'contract_line_wizard'),
         # Contract Template
         ('account_analytic_contract', 'contract_template'),
         # Contract Template Line
