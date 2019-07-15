@@ -916,9 +916,9 @@ class ContractLine(models.Model):
             contract.message_post(body=msg)
         for rec in self:
             if rec.predecessor_contract_line_id:
-                rec.predecessor_contract_line_id.successor_contract_line_id = (
-                    rec
-                )
+                predecessor_contract_line = rec.predecessor_contract_line_id
+                assert not predecessor_contract_line.successor_contract_line_id
+                predecessor_contract_line.successor_contract_line_id = rec
             rec.is_canceled = False
             rec.recurring_next_date = recurring_next_date
         return True
