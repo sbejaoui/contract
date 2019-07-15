@@ -16,7 +16,7 @@ def to_date(date):
 class TestContractBase(common.SavepointCase):
     @classmethod
     def setUpClass(cls):
-        super(TestContractBase, cls).setUpClass()
+        super().setUpClass()
         cls.today = fields.Date.today()
         cls.partner = cls.env.ref('base.res_partner_2')
         cls.product_1 = cls.env.ref('product.product_product_1')
@@ -139,8 +139,6 @@ class TestContract(TestContractBase):
         res = self.acct_line._onchange_product_id()
         self.assertIn('uom_id', res['domain'])
         self.acct_line.price_unit = 100.0
-        with self.assertRaises(ValidationError):
-            self.contract.partner_id = False
         self.contract.partner_id = self.partner.id
         self.contract.recurring_create_invoice()
         self.invoice_monthly = self.contract._get_related_invoices()

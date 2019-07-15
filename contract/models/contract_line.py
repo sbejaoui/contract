@@ -1079,7 +1079,7 @@ class ContractLine(models.Model):
                 view_id = self.env.ref(
                     'contract.contract_line_customer_form_view'
                 ).id
-        return super(ContractLine, self).fields_view_get(
+        return super().fields_view_get(
             view_id, view_type, toolbar, submenu
         )
 
@@ -1090,7 +1090,7 @@ class ContractLine(models.Model):
             raise ValidationError(
                 _("Contract line must be canceled before delete")
             )
-        return super(ContractLine, self).unlink()
+        return super().unlink()
 
     @api.multi
     def _get_quantity_to_invoice(
