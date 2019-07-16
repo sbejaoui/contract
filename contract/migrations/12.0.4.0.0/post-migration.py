@@ -60,6 +60,20 @@ CONTRACT_LINE_FIELDS = [
 ]
 
 
+def _get_contract_field_name(cr):
+    """
+    Contract field changed the name from analytic_account_id to contract_id
+    in 12.0.2.0.0. This method used to get the contract field name in
+    account_analytic_invoice_line"""
+    return (
+        'contract_id'
+        if openupgrade.column_exists(
+            cr, 'account_analytic_invoice_line', 'contract_id'
+        )
+        else 'analytic_account_id'
+    )
+
+
 def _copy_contract_table(cr):
     contract_fields = []
     for field in CONTRACT_FIELDS:
@@ -68,13 +82,7 @@ def _copy_contract_table(cr):
     account_analytic_account_fields = contract_fields.copy()
     contract_fields.append('analytic_account_id')
     account_analytic_account_fields.append('id')
-    contract_field_name = (
-        'contract_id'
-        if openupgrade.column_exists(
-            cr, 'account_analytic_invoice_line', 'contract_id'
-        )
-        else 'analytic_account_id'
-    )
+    contract_field_name = _get_contract_field_name(cr)
     openupgrade.logged_query(
         cr,
         "INSERT INTO contract_contract ("
@@ -88,24 +96,43 @@ def _copy_contract_table(cr):
         + " FROM "
         + "account_analytic_invoice_line)",
     )
+    if openupgrade.column_exists(cr, 'account_invoice', 'old_contract_id_tmp'):
+        openupgrade.logged_query(
+            cr,
+            """
+            UPDATE account_invoice
+            SET old_contract_id = old_contract_id_tmp
+            """,
+        )
+        openupgrade.logged_query(
+            cr,
+            """
+            ALTER TABLE account_invoice
+            DROP COLUMN old_contract_id_tmp
+            """,
+        )
+
     openupgrade.logged_query(
         cr,
-        """
-        UPDATE account_invoice
-        SET old_contract_id = old_contract_id_tmp
-        """,
+        "UPDATE ir_attachment SET res_model='contract.contract'"
+        + "WHERE res_model='account.analytic.account' "
+        + "AND res_id IN ( SELECT DISTINCT "
+        + contract_field_name
+        + " FROM account_analytic_invoice_line)",
     )
     openupgrade.logged_query(
         cr,
-        """
-        ALTER TABLE account_invoice
-        DROP COLUMN old_contract_id_tmp
-        """,
+        "UPDATE mail_message SET model='contract.contract'"
+        + "WHERE model='account.analytic.account' "
+        + "AND res_id IN ( SELECT DISTINCT "
+        + contract_field_name
+        + " FROM account_analytic_invoice_line)",
     )
 
 
 def _copy_contract_line_table(cr):
     contract_line_fields = []
+    contract_field_name = _get_contract_field_name(cr)
     for field in CONTRACT_LINE_FIELDS:
         if openupgrade.column_exists(
             cr, 'account_analytic_invoice_line', field
@@ -113,7 +140,7 @@ def _copy_contract_line_table(cr):
             contract_line_fields.append(field)
     account_analytic_invoice_line_fields = contract_line_fields.copy()
     contract_line_fields.append('contract_id')
-    account_analytic_invoice_line_fields.append('analytic_account_id')
+    account_analytic_invoice_line_fields.append(contract_field_name)
     contract_line_fields.append('active')
     account_analytic_invoice_line_fields.append('true')
 

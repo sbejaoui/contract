@@ -99,17 +99,20 @@ def migrate(env, version):
             UPDATE account_invoice_line SET contract_line_id = NULL
             """,
         )
-    openupgrade.logged_query(
-        cr,
-        """
-        ALTER TABLE account_invoice
-        ADD COLUMN old_contract_id_tmp INTEGER
-        """,
-    )
-    openupgrade.logged_query(
-        cr,
-        """
-        UPDATE account_invoice
-        SET old_contract_id_tmp = contract_id
-        """,
-    )
+    if not openupgrade.column_exists(
+        cr, 'account_invoice', 'old_contract_id'
+    ):
+        openupgrade.logged_query(
+            cr,
+            """
+            ALTER TABLE account_invoice
+            ADD COLUMN old_contract_id_tmp INTEGER
+            """,
+        )
+        openupgrade.logged_query(
+            cr,
+            """
+            UPDATE account_invoice
+            SET old_contract_id_tmp = contract_id
+            """,
+        )
