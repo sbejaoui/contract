@@ -27,6 +27,10 @@ class ContractLine(models.Model):
         ondelete='cascade',
         oldname='analytic_account_id',
     )
+    analytic_account_id = fields.Many2one(
+        string="Analytic account",
+        comodel_name='account.analytic.account',
+    )
     date_start = fields.Date(
         string='Date Start',
         required=True,
@@ -519,7 +523,7 @@ class ContractLine(models.Model):
         invoice_line_vals.update(
             {
                 'name': name,
-                'account_analytic_id': self.contract_id.analytic_account_id.id,
+                'account_analytic_id': self.analytic_account_id.id,
                 'price_unit': self.price_unit,
             }
         )

@@ -79,9 +79,6 @@ def _copy_contract_table(cr):
     for field in CONTRACT_FIELDS:
         if openupgrade.column_exists(cr, 'account_analytic_account', field):
             contract_fields.append(field)
-    account_analytic_account_fields = contract_fields.copy()
-    contract_fields.append('analytic_account_id')
-    account_analytic_account_fields.append('id')
     contract_field_name = _get_contract_field_name(cr)
     openupgrade.logged_query(
         cr,
@@ -89,7 +86,7 @@ def _copy_contract_table(cr):
         + ', '.join(contract_fields)
         + ") "
         + "SELECT "
-        + ', '.join(account_analytic_account_fields)
+        + ', '.join(contract_fields)
         + " FROM account_analytic_account "
         + "WHERE id in ( SELECT DISTINCT "
         + contract_field_name
@@ -140,6 +137,8 @@ def _copy_contract_line_table(cr):
             contract_line_fields.append(field)
     account_analytic_invoice_line_fields = contract_line_fields.copy()
     contract_line_fields.append('contract_id')
+    account_analytic_invoice_line_fields.append(contract_field_name)
+    contract_line_fields.append('analytic_account_id')
     account_analytic_invoice_line_fields.append(contract_field_name)
     contract_line_fields.append('active')
     account_analytic_invoice_line_fields.append('true')

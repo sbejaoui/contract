@@ -77,7 +77,6 @@
                             <field name="create_invoice_visibility"
                                    invisible="1"/>
                             <group>
-                                <field name="analytic_account_id"/>
                                 <field name="code"/>
                                 <field name="group_id"/>
                                 <field name="company_id"

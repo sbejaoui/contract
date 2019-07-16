@@ -27,10 +27,6 @@ class ContractContract(models.Model):
         comodel_name='account.analytic.account',
         ondelete='restrict',
     )
-    analytic_account_id = fields.Many2one(
-        string="Analytic account",
-        comodel_name='account.analytic.account',
-    )
     currency_id = fields.Many2one(
         related="company_id.currency_id",
         string="Currency",
