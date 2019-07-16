@@ -13,6 +13,7 @@ from .contract_line_constraints import get_allowed
 
 class ContractLine(models.Model):
     _name = 'contract.line'
+    _description = "Contract"
     _inherit = 'contract.abstract.contract.line'
 
     sequence = fields.Integer(

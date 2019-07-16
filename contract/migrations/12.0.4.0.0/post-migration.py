@@ -86,6 +86,20 @@ def _copy_contract_table(cr):
         + " FROM "
         + "account_analytic_invoice_line)",
     )
+    openupgrade.logged_query(
+        cr,
+        """
+        UPDATE account_invoice
+        SET old_contract_id = old_contract_id_tmp
+        """,
+    )
+    openupgrade.logged_query(
+        cr,
+        """
+        ALTER TABLE account_invoice
+        DROP COLUMN old_contract_id_tmp
+        """,
+    )
 
 
 def _copy_contract_line_table(cr):
@@ -109,18 +123,6 @@ def _copy_contract_line_table(cr):
         + ', '.join(account_analytic_invoice_line_fields)
         + " FROM account_analytic_invoice_line ",
     )
-
-
-@openupgrade.migrate()
-def migrate(env, version):
-    cr = env.cr
-
-    _copy_contract_table(cr)
-    _copy_contract_line_table(cr)
-
-    openupgrade.rename_models(
-        cr, [('account.analytic.invoice.line', 'contract.line')]
-    )
     openupgrade.logged_query(
         cr,
         """
@@ -141,26 +143,47 @@ def migrate(env, version):
         DROP COLUMN contract_line_id_tmp
         """,
     )
-    openupgrade.logged_query(
-        cr,
-        """
-        UPDATE account_invoice
-        SET old_contract_id = old_contract_id_tmp
-        """,
+
+
+def _update_no_update_ir_cron(env):
+    # Update ir.cron
+    env.ref('contract.contract_cron_for_invoice').model_id = env.ref(
+        'contract.model_contract_contract'
     )
-    openupgrade.logged_query(
-        cr,
-        """
-        ALTER TABLE account_invoice
-        DROP COLUMN old_contract_id_tmp
-        """,
+    env.ref('contract.contract_line_cron_for_renew').model_id = env.ref(
+        'contract.model_contract_line'
     )
+    env.ref('contract.email_contract_template').model_id = env.ref(
+        'contract.model_contract_contract'
+    )
+
+
+def _init_last_date_invoiced_on_contract_lines(env):
+    _logger.info("init last_date_invoiced field for contract lines")
+    contract_lines = env["contract.line"].search(
+        [("recurring_next_date", "!=", False)]
+    )
+    contract_lines._init_last_date_invoiced()
+
+
+def _init_invoicing_partner_id_on_contracts(env):
+    _logger.info("Populate invoicing partner field on contracts")
+    contracts = env["contract.contract"].search([])
+    contracts._inverse_partner_id()
+
+
+@openupgrade.migrate()
+def migrate(env, version):
+    cr = env.cr
+
+    _copy_contract_table(cr)
+    _copy_contract_line_table(cr)
+    _update_no_update_ir_cron(env)
+
     if version == '12.0.1.0.0':
-        _logger.info("init last_date_invoiced field for contract lines")
-        contract_lines = env["contract.line"].search(
-            [("recurring_next_date", "!=", False)]
-        )
-        contract_lines._init_last_date_invoiced()
-        _logger.info("Populate invoicing partner field on contracts")
-        contracts = env["contract.contract"].search([])
-        contracts._inverse_partner_id()
+        # We check the version here as this post-migration script was in
+        # 12.0.2.0.0 and already done for those who used the module when
+        # it was a PR
+        _init_last_date_invoiced_on_contract_lines(env)
+        _init_invoicing_partner_id_on_contracts(env)
+
