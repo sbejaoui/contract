@@ -14,7 +14,7 @@ def _set_finished_contract(cr):
         cr,
         """
         UPDATE account_analytic_account
-        SET    recurring_next_date=NULL 
+        SET    recurring_next_date=NULL
         WHERE  recurring_next_date > date_end
         """,
     )
@@ -39,16 +39,16 @@ def _move_contract_recurrence_info_to_contract_line(cr):
         cr,
         """
         UPDATE account_analytic_invoice_line AS contract_line
-        SET 
+        SET
             recurring_rule_type=contract.recurring_rule_type,
             recurring_invoicing_type=contract.recurring_invoicing_type,
             recurring_interval=contract.recurring_interval,
             recurring_next_date=contract.recurring_next_date,
             date_start=contract.date_start,
             date_end=contract.date_end
-        FROM 
+        FROM
             account_analytic_account AS contract
-        WHERE 
+        WHERE
             contract.id=contract_line.analytic_account_id
         """,
     )
@@ -70,13 +70,13 @@ def _move_contract_template_recurrence_info_to_contract_template_line(cr):
         cr,
         """
     UPDATE account_analytic_contract_line AS contract_template_line
-    SET 
+    SET
         recurring_rule_type=contract_template.recurring_rule_type,
         recurring_invoicing_type=contract_template.recurring_invoicing_type,
         recurring_interval=contract_template.recurring_interval
-    FROM 
+    FROM
         account_analytic_contract AS contract_template
-    WHERE 
+    WHERE
         contract_template.id=contract_template_line.analytic_account_id
     """,
     )
