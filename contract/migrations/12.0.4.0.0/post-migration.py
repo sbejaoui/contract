@@ -111,6 +111,7 @@ def _copy_contract_line_table(cr):
             contract_line_fields.append(field)
     account_analytic_invoice_line_fields = contract_line_fields.copy()
     contract_line_fields.append('contract_id')
+    account_analytic_invoice_line_fields.append('analytic_account_id')
     contract_line_fields.append('active')
     account_analytic_invoice_line_fields.append('true')
 

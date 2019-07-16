@@ -8,14 +8,8 @@ from openupgradelib import openupgrade
 _logger = logging.getLogger(__name__)
 
 
-@openupgrade.migrate()
-def migrate(env, version):
-    """
-    set recurring_next_date to false for finished contract
-    """
-    _logger.info(">> Pre-Migration 12.0.2.0.0")
+def _set_finished_contract(cr):
     _logger.info("set recurring_next_date to false for finished contract")
-    cr = env.cr
     openupgrade.logged_query(
         cr,
         """
@@ -25,6 +19,8 @@ def migrate(env, version):
         """,
     )
 
+
+def _move_contract_recurrence_info_to_contract_line(cr):
     _logger.info("Move contract data to line level")
     openupgrade.logged_query(
         cr,
@@ -56,3 +52,43 @@ def migrate(env, version):
             contract.id=contract_line.analytic_account_id
         """,
     )
+
+
+def _move_contract_template_recurrence_info_to_contract_template_line(cr):
+    _logger.info("Move contract template data to line level")
+    openupgrade.logged_query(
+        cr,
+        """
+    ALTER TABLE account_analytic_contract_line
+        ADD COLUMN IF NOT EXISTS recurring_rule_type         VARCHAR(255),
+        ADD COLUMN IF NOT EXISTS recurring_invoicing_type    VARCHAR(255),
+        ADD COLUMN IF NOT EXISTS recurring_interval          INTEGER
+    """,
+    )
+
+    openupgrade.logged_query(
+        cr,
+        """
+    UPDATE account_analytic_contract_line AS contract_template_line
+    SET 
+        recurring_rule_type=contract_template.recurring_rule_type,
+        recurring_invoicing_type=contract_template.recurring_invoicing_type,
+        recurring_interval=contract_template.recurring_interval
+    FROM 
+        account_analytic_contract AS contract_template
+    WHERE 
+        contract_template.id=contract_template_line.analytic_account_id
+    """,
+    )
+
+
+@openupgrade.migrate()
+def migrate(env, version):
+    """
+    set recurring_next_date to false for finished contract
+    """
+    _logger.info(">> Pre-Migration 12.0.2.0.0")
+    cr = env.cr
+    _set_finished_contract(cr)
+    _move_contract_recurrence_info_to_contract_line(cr)
+    _move_contract_template_recurrence_info_to_contract_template_line(cr)
