@@ -14,7 +14,11 @@ from odoo.tools.translate import _
 class ContractContract(models.Model):
     _name = 'contract.contract'
     _description = "Contract"
-    _inherit = ['mail.thread', 'contract.abstract.contract']
+    _inherit = [
+        'mail.thread',
+        'mail.activity.mixin',
+        'contract.abstract.contract',
+    ]
 
     active = fields.Boolean(
         default=True,
