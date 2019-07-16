@@ -110,6 +110,7 @@ def _copy_contract_table(cr):
             """,
         )
 
+    # Move contract attachments
     openupgrade.logged_query(
         cr,
         "UPDATE ir_attachment SET res_model='contract.contract'"
@@ -118,10 +119,20 @@ def _copy_contract_table(cr):
         + contract_field_name
         + " FROM account_analytic_invoice_line)",
     )
+    # Move contract messages
     openupgrade.logged_query(
         cr,
         "UPDATE mail_message SET model='contract.contract'"
         + "WHERE model='account.analytic.account' "
+        + "AND res_id IN ( SELECT DISTINCT "
+        + contract_field_name
+        + " FROM account_analytic_invoice_line)",
+    )
+    # Move contract followers
+    openupgrade.logged_query(
+        cr,
+        "UPDATE mail_followers SET res_model='contract.contract'"
+        + "WHERE res_model='account.analytic.account' "
         + "AND res_id IN ( SELECT DISTINCT "
         + contract_field_name
         + " FROM account_analytic_invoice_line)",
