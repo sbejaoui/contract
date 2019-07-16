@@ -4,6 +4,7 @@
 import logging
 
 from openupgradelib import openupgrade
+from odoo.tools import parse_version
 
 _logger = logging.getLogger(__name__)
 
@@ -209,7 +210,7 @@ def migrate(env, version):
     _copy_contract_line_table(cr)
     _update_no_update_ir_cron(env)
 
-    if version == '12.0.1.0.0':
+    if parse_version(version) < parse_version('12.0.2.0.0'):
         # We check the version here as this post-migration script was in
         # 12.0.2.0.0 and already done for those who used the module when
         # it was a PR
