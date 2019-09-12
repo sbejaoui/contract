@@ -102,13 +102,6 @@ def _copy_contract_table(cr):
             SET old_contract_id = old_contract_id_tmp
             """,
         )
-        openupgrade.logged_query(
-            cr,
-            """
-            ALTER TABLE account_invoice
-            DROP COLUMN old_contract_id_tmp
-            """,
-        )
 
     # Move contract attachments
     openupgrade.logged_query(
@@ -164,24 +157,12 @@ def _copy_contract_line_table(cr):
         + ', '.join(account_analytic_invoice_line_fields)
         + " FROM account_analytic_invoice_line ",
     )
-    openupgrade.logged_query(
-        cr,
-        """
-        DROP TABLE account_analytic_invoice_line
-        """,
-    )
+
     openupgrade.logged_query(
         cr,
         """
         UPDATE account_invoice_line
         SET contract_line_id = contract_line_id_tmp
-        """,
-    )
-    openupgrade.logged_query(
-        cr,
-        """
-        ALTER TABLE account_invoice_line
-        DROP COLUMN contract_line_id_tmp
         """,
     )
 
