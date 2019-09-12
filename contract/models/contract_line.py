@@ -602,6 +602,7 @@ class ContractLine(models.Model):
     def _init_last_date_invoiced(self):
         """Used to init last_date_invoiced for migration purpose"""
         for rec in self:
+            last_date_invoiced = rec.recurring_next_date - relativedelta(days=1)
             if rec.recurring_rule_type == 'monthlylastday':
                 last_date_invoiced = (
                     rec.recurring_next_date
