@@ -94,13 +94,10 @@ def create_contract_records(cr):
     )
     openupgrade.logged_query(
         cr, sql.SQL("""
-        INSERT INTO contract_contract
-        SELECT * FROM account_analytic_account
-        WHERE id IN (SELECT DISTINCT {} FROM contract_line)
-        AND recurring_invoices
-        """).format(
-            sql.Identifier(contract_field_name),
-        ),
+            INSERT INTO contract_contract
+            SELECT * FROM account_analytic_account
+            WHERE partner_id IS NOT NULL
+            """),
     )
     # Handle id sequence
     cr.execute("CREATE SEQUENCE IF NOT EXISTS contract_contract_id_seq")
