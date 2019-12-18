@@ -1166,16 +1166,9 @@ class ContractLine(models.Model):
 
     @api.multi
     def renew(self):
-        res = self.env['contract.line']
         for rec in self:
-            is_auto_renew = rec.is_auto_renew
-            rec.stop(rec.date_end, post_message=False)
             date_start, date_end = rec._get_renewal_dates()
-            new_line = rec.plan_successor(
-                date_start, date_end, is_auto_renew, post_message=False
-            )
-            new_line._onchange_date_start()
-            res |= new_line
+            rec.date_end = date_end
             msg = _(
                 """Contract line for <strong>{product}</strong>
                 renewed: <br/>
@@ -1189,7 +1182,7 @@ class ContractLine(models.Model):
                 )
             )
             rec.contract_id.message_post(body=msg)
-        return res
+        return self
 
     @api.model
     def _contract_line_to_renew_domain(self):

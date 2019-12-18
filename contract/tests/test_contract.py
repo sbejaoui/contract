@@ -1641,33 +1641,6 @@ class TestContract(TestContractBase):
                 to_date('2016-03-01'), to_date('2018-09-01'), False
             )
 
-    def test_search_contract_line_to_renew(self):
-        self.acct_line.write({'date_end': self.today, 'is_auto_renew': True})
-        line_1 = self.acct_line.copy(
-            {'date_end': self.today + relativedelta(months=1)}
-        )
-        line_2 = self.acct_line.copy(
-            {'date_end': self.today - relativedelta(months=1)}
-        )
-        line_3 = self.acct_line.copy(
-            {'date_end': self.today - relativedelta(months=2)}
-        )
-        line_4 = self.acct_line.copy(
-            {'date_end': self.today + relativedelta(months=2)}
-        )
-        to_renew = self.acct_line.search(
-            self.acct_line._contract_line_to_renew_domain()
-        )
-        self.assertEqual(
-            set(to_renew), set((self.acct_line, line_1, line_2, line_3))
-        )
-        self.acct_line.cron_renew_contract_line()
-        self.assertTrue(self.acct_line.successor_contract_line_id)
-        self.assertTrue(line_1.successor_contract_line_id)
-        self.assertTrue(line_2.successor_contract_line_id)
-        self.assertTrue(line_3.successor_contract_line_id)
-        self.assertFalse(line_4.successor_contract_line_id)
-
     def test_renew(self):
         date_start = self.today - relativedelta(months=9)
         date_end = (
@@ -1683,14 +1656,13 @@ class TestContract(TestContractBase):
         )
         self.acct_line._onchange_is_auto_renew()
         self.assertEqual(self.acct_line.date_end, date_end)
-        new_line = self.acct_line.renew()
-        self.assertFalse(self.acct_line.is_auto_renew)
-        self.assertTrue(new_line.is_auto_renew)
+        self.acct_line.renew()
+        self.assertTrue(self.acct_line.is_auto_renew)
         self.assertEqual(
-            new_line.date_start, date_start + relativedelta(months=12)
+            self.acct_line.date_start, date_start
         )
         self.assertEqual(
-            new_line.date_end, date_end + relativedelta(months=12)
+            self.acct_line.date_end, date_end + relativedelta(months=12)
         )
 
     def test_cron_recurring_create_invoice(self):
